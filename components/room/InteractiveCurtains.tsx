@@ -178,14 +178,18 @@ export const InteractiveCurtains: React.FC<InteractiveCurtainsProps> = ({
         </svg>
       </div>
 
-      {/* PHYSICAL CURTAIN PULL CORD (Interactive pull string within player reach!) */}
+      {/* PHYSICAL CURTAIN PULL CORD (Mounted directly to the top curtain track & bracket) */}
       <div
         onClick={handlePullCord}
-        className="absolute top-2 left-10 sm:left-12 flex flex-col items-center cursor-pointer pointer-events-auto group p-1 z-30"
+        className="absolute -top-3 left-10 sm:left-12 flex flex-col items-center cursor-pointer pointer-events-auto group z-30"
         title={isOpen ? 'Pull string to draw curtains closed' : 'Pull string to open curtains'}
       >
-        {/* Cord String line */}
-        <div className="w-0.5 h-24 sm:h-28 bg-[#ebd9c8] shadow-sm group-hover:bg-amber-200 transition-colors" />
+        {/* Solid Brass & Wood Pulley Bracket connected to rail */}
+        <div className="w-3.5 h-3.5 bg-[#4a3427] border border-[#2a1a11] rounded-b shadow-xs flex items-center justify-center">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#c5a059] border border-[#8a682b]" />
+        </div>
+        {/* Cord String line hanging continuously from bracket */}
+        <div className="w-0.5 h-26 sm:h-30 bg-[#ebd9c8] shadow-sm group-hover:bg-amber-200 transition-colors" />
         {/* Turned Wooden Acorn Pull Bead */}
         <div className="w-3.5 h-5 rounded-b-full rounded-t-sm bg-[#5c3a21] border border-[#3d2412] shadow-md group-hover:scale-110 active:scale-95 transition-transform flex items-center justify-center">
           <div className="w-1.5 h-1.5 rounded-full bg-[#825432]" />

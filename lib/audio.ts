@@ -143,6 +143,52 @@ class SoundEngine {
     lfo.stop(now + 1.3);
   }
 
+  // Soft adorable cat chirp / meow
+  public playCatMeow() {
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(540, now);
+    osc.frequency.exponentialRampToValueAtTime(780, now + 0.12);
+    osc.frequency.exponentialRampToValueAtTime(460, now + 0.35);
+
+    gain.gain.setValueAtTime(0.01, now);
+    gain.gain.linearRampToValueAtTime(0.14, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(now);
+    osc.stop(now + 0.4);
+  }
+
+  // Soft muffled paw jump / landing thud
+  public playCatJump() {
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(110, now);
+    osc.frequency.exponentialRampToValueAtTime(45, now + 0.09);
+
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(now);
+    osc.stop(now + 0.11);
+  }
+
   // Tea pour sizzle / drip
   public playTeaPour() {
     this.initCtx();
@@ -294,6 +340,112 @@ class SoundEngine {
       osc.start(now + idx * 0.08);
       osc.stop(now + idx * 0.08 + 0.09);
     });
+  }
+
+  // Cozy warm tea sip sound (gentle warm liquid draw + contented soft resonance)
+  public playTeaSip() {
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    // Gentle liquid warmth swallow
+    [380, 440, 520].forEach((freq, idx) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.7, now + idx * 0.12 + 0.15);
+
+      gain.gain.setValueAtTime(0.06, now + idx * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.18);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+      osc.start(now + idx * 0.12);
+      osc.stop(now + idx * 0.12 + 0.2);
+    });
+
+    // Contented delicate chime at the end
+    const chime = this.ctx.createOscillator();
+    const chimeGain = this.ctx.createGain();
+    chime.type = 'triangle';
+    chime.frequency.setValueAtTime(880, now + 0.45);
+    chime.frequency.exponentialRampToValueAtTime(1046.5, now + 0.6);
+    chimeGain.gain.setValueAtTime(0.04, now + 0.45);
+    chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.1);
+
+    chime.connect(chimeGain);
+    chimeGain.connect(this.masterGain);
+    chime.start(now + 0.45);
+    chime.stop(now + 1.15);
+  }
+
+  // Wooden drawer sliding open sound
+  public playDrawerOpen() {
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    // Soft wood friction slide
+    const bufferSize = Math.floor(this.ctx.sampleRate * 0.25);
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.05;
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(600, now);
+    filter.frequency.linearRampToValueAtTime(450, now + 0.25);
+    filter.Q.setValueAtTime(2.5, now);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.25);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+    noise.start(now);
+    noise.stop(now + 0.26);
+
+    // Subtle wooden stop thump
+    const osc = this.ctx.createOscillator();
+    const thumpGain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(110, now + 0.18);
+    osc.frequency.exponentialRampToValueAtTime(55, now + 0.26);
+    thumpGain.gain.setValueAtTime(0.09, now + 0.18);
+    thumpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+    osc.connect(thumpGain);
+    thumpGain.connect(this.masterGain);
+    osc.start(now + 0.18);
+    osc.stop(now + 0.29);
+  }
+
+  // Wooden drawer sliding closed click/thump
+  public playDrawerClose() {
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.08);
+
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    osc.start(now);
+    osc.stop(now + 0.1);
   }
 }
 

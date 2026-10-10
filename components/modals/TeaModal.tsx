@@ -8,7 +8,7 @@ interface TeaModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBrew: (teaName: string) => void;
-  onSip: () => void;
+  onSip?: () => void;
   currentTea: string | null;
   teaCount: number;
 }
@@ -52,7 +52,6 @@ export const TeaModal: React.FC<TeaModalProps> = ({
   isOpen,
   onClose,
   onBrew,
-  onSip,
   currentTea,
   teaCount,
 }) => {
@@ -68,11 +67,6 @@ export const TeaModal: React.FC<TeaModalProps> = ({
       setIsBrewing(false);
       onBrew(selectedBlend.name);
     }, 900);
-  };
-
-  const handleSip = () => {
-    sound.playTeaPour();
-    onSip();
   };
 
   return (
@@ -105,21 +99,17 @@ export const TeaModal: React.FC<TeaModalProps> = ({
         </div>
 
         {/* Current status */}
-        <div className="relative mt-3.5 p-3.5 rounded-2xl bg-[#fffbeb] border-2 border-[#fcd34d] shadow-[0_3px_0_#fde68a] flex items-center justify-between">
+        <div className="relative mt-3.5 p-3.5 rounded-2xl bg-[#fffbeb] border-2 border-[#fcd34d] shadow-[0_3px_0_#fde68a]">
           <div>
             <p className="text-[11px] font-black font-serif text-[#92400e] uppercase tracking-wider">Cup on the Desk</p>
             <p className="text-sm font-black font-serif text-[#5c3a21] mt-0.5">
               {currentTea ? currentTea : 'Empty cute mug, waiting to brew'}
             </p>
+            <p className="text-[11px] font-serif text-[#a16207] mt-1 flex items-center gap-1.5">
+              <Coffee className="w-3.5 h-3.5 inline text-amber-700 shrink-0" />
+              <span>Tap or click the mug on the desk anytime to enjoy a warm sip with Mimi!</span>
+            </p>
           </div>
-          {currentTea && (
-            <button
-              onClick={handleSip}
-              className="px-3.5 py-1.5 text-xs font-black font-serif bg-[#f59e0b] hover:bg-[#d97706] active:translate-y-0.5 text-white rounded-xl border-b-3 border-[#b45309] shadow-sm transition-all"
-            >
-              Take a Sip ☕
-            </button>
-          )}
         </div>
 
         {/* Tea Selection */}

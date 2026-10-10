@@ -28,6 +28,7 @@ import { CollectionModal } from '@/components/modals/CollectionModal';
 import { MimiGalleryModal } from '@/components/modals/MimiGalleryModal';
 import { SettingsModal } from '@/components/modals/SettingsModal';
 import { CurtainColorModal } from '@/components/modals/CurtainColorModal';
+import { LetterModal } from '@/components/modals/LetterModal';
 import { KeepsakeAsset } from '@/components/art/GameAssets';
 import { getDialogueForEvent } from '@/lib/mimiDialogue';
 import { sound } from '@/lib/audio';
@@ -255,6 +256,7 @@ export const CozyRoom: React.FC = () => {
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isCurtainModalOpen, setIsCurtainModalOpen] = useState(false);
+  const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
 
   // Computed modal status to protect layering and prevent dialogue clipping
   const isAnyModalOpen =
@@ -264,7 +266,8 @@ export const CozyRoom: React.FC = () => {
     isCollectionModalOpen ||
     isGalleryModalOpen ||
     isSettingsModalOpen ||
-    isCurtainModalOpen;
+    isCurtainModalOpen ||
+    isLetterModalOpen;
 
   // Immediately cancel locomotion before presenting modal
   const openModalSafely = useCallback((setter: (open: boolean) => void) => {
@@ -472,7 +475,6 @@ export const CozyRoom: React.FC = () => {
           // Finished all waypoints in path
           setIsWalking(false);
           setWalkFrame(0);
-          setTargetMarker(null);
           if (desiredFacing) setMimiFacing(desiredFacing);
           walkCancelRef.current = null;
           onArrival?.();
@@ -555,26 +557,28 @@ export const CozyRoom: React.FC = () => {
   // CONTEXTUAL OBJECT INTERACTIONS (BUILDING ON MOVEMENT)
   // =========================================================================
 
-  // 1. TEA MUG INTERACTION (Walking -> Reaching/Drinking -> Warm dialogue)
+  // 1. TEA MUG INTERACTION (Walking -> Sipping Animation -> Warm dialogue & milestones)
   const handleDrinkTeaAction = useCallback(() => {
     interactWithObject('MUG', () => {
       setMimiPosture('DRINKING');
       setMimiExpression('CONTENT');
-      sound.playCuteInteraction();
+      sound.playTeaSip();
       handleGameEvent('SIP_TEA', 'CONTENT');
+
+      const nextCount = teaCount + 1;
+      setTeaCount(nextCount);
+      checkMilestones(nextCount, petCount, windowTapCount, mimiTapCount, collectibles);
 
       // Gracefully lower cup back after savoring
       setTimeout(() => {
         setMimiPosture('STANDING');
       }, 4200);
     });
-  }, [interactWithObject, handleGameEvent]);
+  }, [interactWithObject, handleGameEvent, checkMilestones, teaCount, petCount, windowTapCount, mimiTapCount, collectibles]);
 
-  // Open tea modal: if player taps "Tea" in footer, Mimi walks to desk then opens modal
+  // Open tea modal: if player taps "Tea" in footer, Mimi walks to desk then opens brewing modal
   const handleOpenTeaRitual = useCallback(() => {
     interactWithObject('MUG', () => {
-      setMimiPosture('DRINKING');
-      setMimiExpression('CONTENT');
       openModalSafely(setIsTeaModalOpen);
     });
   }, [interactWithObject, openModalSafely]);
@@ -598,7 +602,7 @@ export const CozyRoom: React.FC = () => {
   const handlePetCatAction = useCallback(() => {
     interactWithObject('CAT', () => {
       setMimiPosture('CROUCHING');
-      setMimiExpression('DELIGHTED');
+      setMimiExpression('CONTENT');
       sound.playCatPurr();
 
       const newCount = petCount + 1;
@@ -608,6 +612,7 @@ export const CozyRoom: React.FC = () => {
 
       setTimeout(() => {
         setMimiPosture('STANDING');
+        setMimiExpression('DELIGHTED');
       }, 3500);
     });
   }, [interactWithObject, petCount, teaCount, windowTapCount, mimiTapCount, collectibles, checkMilestones, handleGameEvent]);
@@ -990,58 +995,65 @@ export const CozyRoom: React.FC = () => {
                   e.stopPropagation();
                   handleDiscoverHiddenItem('lucky_pebble');
                 }}
-                className="absolute -bottom-1 right-8 w-5 h-5 rounded-full bg-stone-400/80 hover:bg-stone-200 border border-stone-600 shadow-md transition-all animate-pulse z-30"
-                title="A smooth pebble on the sill..."
-              />
+                className="absolute bottom-1 right-12 opacity-75 hover:opacity-100 transition-opacity animate-bounce z-30"
+                title="A smooth keepsake pebble resting on the sill..."
+              >
+                <KeepsakeAsset assetKey="pebble" size={16} />
+              </button>
             )}
           </section>
 
           {/* 2. MID ROOM: THE ARTISAN STUDY DESK */}
           <section
-            className="absolute top-[35%] inset-x-2 sm:inset-x-4 z-20 flex justify-center"
+            className="absolute top-[35%] inset-x-2 sm:inset-x-4 z-30 flex justify-center pointer-events-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <CozyDesk
               lampOn={lampOn}
               onToggleLamp={handleToggleLampAction}
               currentTea={currentTea}
-              onOpenTea={handleDrinkTeaAction}
+              onSipTea={handleDrinkTeaAction}
               onOpenJournal={handleOpenJournalAction}
+              onOpenLetter={() => openModalSafely(setIsLetterModalOpen)}
               onWaterPlant={handleWaterPlantAction}
               onTapFigurine={handleTapFigurineAction}
               onDiscoverHiddenItem={handleDiscoverHiddenItem}
               discoveredItemIds={collectibles.filter((c) => c.discovered).map((c) => c.id)}
               plantBloomed={plantBloomed}
+              isMimiHoldingMug={mimiPosture === 'DRINKING'}
               decor={decor}
             />
           </section>
 
-          {/* 3. LOWER-LEFT ROOM: SLEEPING CAT MOCHI */}
-          <section
-            className="absolute bottom-3 left-3 w-[36%] z-25"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative">
-              <CozyCat
-                onPet={handlePetCatAction}
-                petCount={petCount}
-                reducedMotion={settings.reducedMotion}
-              />
+          {/* 3. CAT MOCHI & BED (Floor bed, mid-room desk leap & window sill hangout) */}
+          <section className="absolute inset-0 z-25 pointer-events-none">
+            <CozyCat
+              curtainsOpen={curtainsOpen}
+              onPet={handlePetCatAction}
+              petCount={petCount}
+              reducedMotion={settings.reducedMotion}
+              onCatDialogue={(text) => {
+                setActiveDialogue({
+                  id: `mochi-${Date.now()}`,
+                  text,
+                  expression: 'CONTENT',
+                });
+              }}
+            />
 
-              {/* Hidden Four-Leaf Clover by cat cushion */}
-              {!collectibles.find((c) => c.id === 'pressed_clover')?.discovered && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDiscoverHiddenItem('pressed_clover');
-                  }}
-                  className="absolute -bottom-1 left-2 opacity-80 hover:opacity-100 transition-opacity animate-bounce z-30"
-                  title="Something green beside the cushion..."
-                >
-                  <KeepsakeAsset assetKey="clover" size={18} />
-                </button>
-              )}
-            </div>
+            {/* Hidden Four-Leaf Clover by cat cushion */}
+            {!collectibles.find((c) => c.id === 'pressed_clover')?.discovered && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDiscoverHiddenItem('pressed_clover');
+                }}
+                className="absolute bottom-2 left-40 opacity-80 hover:opacity-100 transition-opacity animate-bounce z-30 pointer-events-auto"
+                title="Something green beside the cushion..."
+              >
+                <KeepsakeAsset assetKey="clover" size={18} />
+              </button>
+            )}
           </section>
 
           {/* 4. STORYBOOK CONTEXTUAL SPEECH BUBBLE WITH SCREEN COLLISION & FACE-CLEARING PLACEMENT */}
@@ -1180,9 +1192,13 @@ export const CozyRoom: React.FC = () => {
             setMimiPosture('STANDING');
           }}
           onBrew={handleBrewTea}
-          onSip={handleDrinkTeaAction}
           currentTea={currentTea}
           teaCount={teaCount}
+        />
+
+        <LetterModal
+          isOpen={isLetterModalOpen}
+          onClose={() => setIsLetterModalOpen(false)}
         />
 
         <JournalModal

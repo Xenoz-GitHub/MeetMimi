@@ -54,7 +54,7 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
   // Posture translation & rotation based on expression & active posture:
   const bodyTransform =
     posture === 'CROUCHING'
-      ? 'translateY(16px) scale(0.95)'
+      ? 'translateY(34px) rotate(-3deg) scale(0.93)'
       : posture === 'DRINKING'
       ? 'translateY(2px)'
       : posture === 'WATERING'
@@ -63,7 +63,9 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
       ? 'translateY(-2px) rotate(2deg)'
       : posture === 'LEAN_FORWARD'
       ? 'translateY(4px) rotate(2.5deg)'
-      : expression === 'HAPPY' || expression === 'DELIGHTED'
+      : expression === 'DELIGHTED'
+      ? 'translateY(-4px) rotate(-1.5deg) scale(1.02)'
+      : expression === 'HAPPY'
       ? 'translateY(-2px)'
       : expression === 'TOUCHED'
       ? 'rotate(-1.5deg)'
@@ -118,7 +120,11 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={`w-full h-full overflow-visible transition-all duration-200 ${
-          reducedMotion || isWalking ? '' : 'animate-[mimi-breathe_4.2s_ease-in-out_infinite]'
+          reducedMotion || isWalking || posture === 'CROUCHING' || posture === 'DRINKING'
+            ? ''
+            : expression === 'DELIGHTED'
+            ? 'animate-[mimi-delighted-bounce_1.2s_ease-in-out_infinite]'
+            : 'animate-[mimi-breathe_4.2s_ease-in-out_infinite]'
         }`}
         style={{
           transform: bodyTransform,
@@ -192,7 +198,43 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
         </g>
 
         {/* 2. LEGS & ADORABLE MARY-JANE SHOES (Organic Chibi Anatomy & Soft Curve Kinematics) */}
-        <g id="legs-and-feet">
+        {posture === 'CROUCHING' ? (
+          /* BENT KNEES CHIBI CROUCH / KNEELING POSE */
+          <g id="legs-crouching-bent">
+            {/* Left Bent Knee */}
+            <g id="left-knee-bent">
+              <path
+                d="M 124 308 C 108 318 102 334 112 346 C 120 354 136 352 142 338 C 144 324 142 312 142 308 Z"
+                fill="#faece3"
+              />
+              <path d="M 110 326 C 108 336 114 344 122 347" stroke="#ebd0bf" strokeWidth="1.2" strokeLinecap="round" />
+              {/* Slouch sock folded around ankle */}
+              <ellipse cx="118" cy="350" rx="13" ry="8" fill="#fffdfa" stroke="#d8cab8" strokeWidth="1.2" />
+              <path d="M 112 348 L 112 355 M 118 347 L 118 356 M 125 348 L 125 355" stroke="#ece2d5" strokeWidth="1" strokeLinecap="round" />
+              {/* Tucked Mary-Jane Shoe resting on floor */}
+              <ellipse cx="116" cy="358" rx="16" ry="6.5" transform="rotate(-8 116 358)" fill="#5d351e" stroke="#3a1e0f" strokeWidth="1.4" />
+              <path d="M 106 361 C 112 364 128 364 131 360" stroke="#eedfcb" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+              <circle cx="117" cy="356" r="1.5" fill="#fbbf24" stroke="#b45309" strokeWidth="0.6" />
+            </g>
+
+            {/* Right Bent Knee */}
+            <g id="right-knee-bent">
+              <path
+                d="M 176 308 C 190 318 196 334 186 346 C 178 354 164 352 158 338 C 156 324 160 312 160 308 Z"
+                fill="#faece3"
+              />
+              <path d="M 188 326 C 190 336 184 344 176 347" stroke="#ebd0bf" strokeWidth="1.2" strokeLinecap="round" />
+              {/* Slouch sock folded around ankle */}
+              <ellipse cx="180" cy="350" rx="13" ry="8" fill="#fffdfa" stroke="#d8cab8" strokeWidth="1.2" />
+              <path d="M 173 348 L 173 355 M 180 347 L 180 356 M 187 348 L 187 355" stroke="#ece2d5" strokeWidth="1" strokeLinecap="round" />
+              {/* Tucked Mary-Jane Shoe resting on floor */}
+              <ellipse cx="182" cy="358" rx="16" ry="6.5" transform="rotate(8 182 358)" fill="#5d351e" stroke="#3a1e0f" strokeWidth="1.4" />
+              <path d="M 172 360 C 176 364 190 364 194 361" stroke="#eedfcb" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+              <circle cx="181" cy="356" r="1.5" fill="#fbbf24" stroke="#b45309" strokeWidth="0.6" />
+            </g>
+          </g>
+        ) : (
+          <g id="legs-and-feet">
           {/* Left Leg */}
           <g
             id="left-leg"
@@ -303,6 +345,7 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
             <ellipse cx="180" cy="395" rx="3.5" ry="1.8" fill="#ffffff" opacity="0.42" />
           </g>
         </g>
+        )}
 
         {/* 3. SWEATER & FULL-BODY GESTURES */}
         <g id="torso-and-sweater" style={{ transform: `translateY(${bodyBobY}px)` }}>
@@ -370,18 +413,10 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
               </g>
             </g>
           ) : posture === 'DRINKING' ? (
-            /* DRINKING TEA: Both hands lifting glazed ceramic mug to mouth */
-            <g id="arms-drinking">
-              {/* Left & Right arms bent upward holding mug */}
-              <path d="M 115 185 C 100 210 110 240 135 225 C 145 220 150 195 140 180 Z" fill="#8eb096" stroke="#75987d" strokeWidth="1.5" />
-              <path d="M 198 185 C 215 210 205 240 180 225 C 170 220 165 195 175 180 Z" fill="#8db096" stroke="#75987d" strokeWidth="1.5" />
-              {/* Lifted Tea Mug in Mimi's hands */}
-              <rect x="145" y="160" width="26" height="24" rx="4" fill="#faf5ee" stroke="#d5c8b5" strokeWidth="1.2" />
-              <ellipse cx="158" cy="160" rx="13" ry="4" fill="#a16207" stroke="#d5c8b5" strokeWidth="1" />
-              <path d="M 171 166 C 177 166 177 176 171 176" stroke="#d5c8b5" strokeWidth="2" fill="none" />
-              {/* Steam wisps */}
-              <path d="M 155 152 Q 153 144 156 138" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-              <path d="M 162 154 Q 164 146 161 140" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+            /* DRINKING TEA: Upper sleeves positioned toward chest */
+            <g id="arms-drinking-sleeves">
+              <path d="M 115 185 C 98 210 110 240 135 225 C 145 220 150 195 140 180 Z" fill="#8eb096" stroke="#75987d" strokeWidth="1.5" />
+              <path d="M 198 185 C 215 210 203 240 178 225 C 168 220 163 195 173 180 Z" fill="#8db096" stroke="#75987d" strokeWidth="1.5" />
             </g>
           ) : posture === 'REACHING' ? (
             /* REACHING: Right arm extended toward lamp switch or curtain cord */
@@ -391,11 +426,34 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
               <ellipse cx="268" cy="160" rx="6" ry="5" fill="#faece3" stroke="#dbbeab" strokeWidth="1" />
             </g>
           ) : posture === 'CROUCHING' ? (
-            /* CROUCHING / PETTING: Both hands gently reaching toward cat */
+            /* CROUCHING / PETTING: Both sleeves gently reaching downward toward cat with loving petting hand motion */
             <g id="arms-crouching">
-              <path d="M 115 185 C 90 205 80 240 90 265 C 100 275 120 265 130 245 Z" fill="#8eb096" stroke="#75987d" strokeWidth="1.5" />
-              <path d="M 198 185 C 185 215 170 255 150 270 C 140 275 135 265 145 250 Z" fill="#8db096" stroke="#75987d" strokeWidth="1.5" />
-              <ellipse cx="140" cy="270" rx="7" ry="5" fill="#faece3" stroke="#dbbeab" strokeWidth="1" />
+              {/* Left arm reaching down and forward with sleeve drapery */}
+              <path
+                d="M 115 185 C 90 215 82 255 102 285 C 114 292 128 275 130 245 Z"
+                fill="#8eb096"
+                stroke="#75987d"
+                strokeWidth="1.5"
+              />
+              {/* Right arm reaching forward and down with sleeve fold */}
+              <path
+                d="M 198 185 C 175 220 152 265 142 292 C 132 296 122 280 134 255 Z"
+                fill="#8db096"
+                stroke="#75987d"
+                strokeWidth="1.5"
+              />
+              {/* Soft stroking hand with tender petting motion */}
+              <g
+                className="animate-[mimi-gentle-petting_1.5s_ease-in-out_infinite]"
+                style={{ transformOrigin: '140px 290px' }}
+              >
+                {/* Hand palm & curved fingers */}
+                <ellipse cx="140" cy="292" rx="9" ry="6.5" transform="rotate(-15 140 292)" fill="#faece3" stroke="#dbbeab" strokeWidth="1" />
+                <path d="M 133 291 Q 139 296 146 293" stroke="#d5b5a0" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+                <path d="M 135 294 Q 141 299 148 296" stroke="#d5b5a0" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+                {/* Floating love glow */}
+                <circle cx="142" cy="289" r="1.5" fill="#f43f5e" opacity="0.85" />
+              </g>
             </g>
           ) : posture === 'LEAN_FORWARD' ? (
             /* LEAN FORWARD: Hands resting forward on sill or desk edge */
@@ -416,7 +474,30 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
               <path d="M 115 185 C 80 195 72 235 90 260 C 105 265 118 245 125 220 Z" fill="#8eb096" stroke="#75987d" strokeWidth="1.5" />
               <path d="M 198 185 C 235 195 242 235 224 260 C 210 265 198 245 190 220 Z" fill="#8db096" stroke="#75987d" strokeWidth="1.5" />
             </g>
-          ) : expression === 'DELIGHTED' || expression === 'HAPPY' ? (
+          ) : expression === 'DELIGHTED' ? (
+            /* DELIGHTED: Sweet joyful posture! Both arms raised playfully with cute chibi hands near rosy cheeks, twinkling sparkles */
+            <g id="arms-delighted">
+              {/* Left arm bent joyfully upward with sleeve fold */}
+              <path d="M 115 185 C 92 196 90 224 105 240 C 114 246 126 238 132 216 Z" fill="#8eb096" stroke="#75987d" strokeWidth="1.5" />
+              {/* Cute little left hand nestled happily beside cheek */}
+              <ellipse cx="110" cy="190" rx="7" ry="6" transform="rotate(-20 110 190)" fill="#faece3" stroke="#dbbeab" strokeWidth="1" />
+              {/* Tiny curved chibi fingers */}
+              <path d="M 106 188 Q 110 184 114 187" stroke="#dbbeab" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+
+              {/* Right arm bent joyfully upward mirroring */}
+              <path d="M 198 185 C 221 196 223 224 208 240 C 199 246 187 238 181 216 Z" fill="#8db096" stroke="#75987d" strokeWidth="1.5" />
+              {/* Cute little right hand nestled happily beside cheek */}
+              <ellipse cx="203" cy="190" rx="7" ry="6" transform="rotate(20 203 190)" fill="#faece3" stroke="#dbbeab" strokeWidth="1" />
+              {/* Tiny curved chibi fingers */}
+              <path d="M 199 187 Q 203 184 207 188" stroke="#dbbeab" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+
+              {/* Twinkling joy sparkles near her joyful hands */}
+              <g className="animate-pulse">
+                <path d="M 96 174 L 98 179 L 103 181 L 98 183 L 96 188 L 94 183 L 89 181 L 94 179 Z" fill="#fbbf24" opacity="0.9" />
+                <path d="M 216 174 L 218 179 L 223 181 L 218 183 L 216 188 L 214 183 L 209 181 L 214 179 Z" fill="#fbbf24" opacity="0.9" />
+              </g>
+            </g>
+          ) : expression === 'HAPPY' ? (
             <g id="arms-cheerful">
               <path d="M 115 185 C 88 198 80 235 95 268 C 105 275 118 265 125 245 Z" fill="#8eb096" stroke="#75987d" strokeWidth="1.5" />
               <path d="M 198 185 C 228 198 234 235 220 268 C 210 275 198 265 190 245 Z" fill="#8db096" stroke="#75987d" strokeWidth="1.5" />
@@ -588,6 +669,61 @@ export const MimiRenderer: React.FC<MimiRendererProps> = ({
           <path d="M 184 80 C 182 100 185 125 192 134" stroke="#4d3b32" strokeWidth="1.4" strokeLinecap="round" />
           <path d="M 122 96 C 142 90 178 90 198 96 C 194 102 146 100 122 96 Z" fill="url(#hairShine)" />
         </g>
+
+        {/* 9. FOREGROUND HELD OBJECT: SIPPING TEA MUG & HANDS */}
+        {posture === 'DRINKING' && (
+          <g
+            id="foreground-drinking-mug"
+            style={{
+              transform: `${bodyTransform} translateY(${bodyBobY}px)`,
+            }}
+          >
+            <g
+              id="foreground-drinking-mug-inner"
+              style={{
+                transformOrigin: '160px 165px',
+                animation: 'mimi-sipping 2.4s ease-in-out infinite',
+              }}
+            >
+              {/* Forearm cuffs coming forward */}
+              <path d="M 124 195 C 130 185 144 178 152 178" stroke="#75987d" strokeWidth="12" strokeLinecap="round" />
+              <path d="M 190 195 C 184 185 170 178 162 178" stroke="#75987d" strokeWidth="12" strokeLinecap="round" />
+
+              {/* The Ceramic Mug and Hands lifted to mouth */}
+              <g transform="translate(138, 142)">
+                {/* Mug Drop Shadow */}
+                <ellipse cx="22" cy="34" rx="16" ry="4.5" fill="rgba(0,0,0,0.25)" />
+                {/* Ceramic Mug Body */}
+                <rect x="6" y="6" width="32" height="27" rx="7" fill="#fed7aa" stroke="#ea580c" strokeWidth="1.6" />
+                <path d="M 8 28 C 12 31 32 31 36 28" stroke="#ea580c" strokeWidth="1" fill="none" opacity="0.6" />
+                {/* Loop Handle */}
+                <path d="M 38 10 C 47 10 47 24 38 24" stroke="#ea580c" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+                {/* Kawaii Face on Mug */}
+                <path d="M 15 17 Q 18 14 21 17" stroke="#7c2d12" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+                <path d="M 25 17 Q 28 14 31 17" stroke="#7c2d12" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+                <path d="M 21 21 Q 23 23 25 21" stroke="#7c2d12" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+                <circle cx="12" cy="19" r="2.2" fill="#fb7185" opacity="0.8" />
+                <circle cx="34" cy="19" r="2.2" fill="#fb7185" opacity="0.8" />
+                {/* Tea Liquid Rim & Latte Art */}
+                <ellipse cx="22" cy="6" rx="16" ry="4.5" fill="#78350f" stroke="#ea580c" strokeWidth="1.3" />
+                <ellipse cx="22" cy="6" rx="13.5" ry="3.2" fill="#fef08a" />
+                <path d="M 22 4.5 C 20 2 17 4.5 22 7.5 C 27 4.5 24 2 22 4.5 Z" fill="#c2410c" opacity="0.85" />
+                {/* Mimi's Hands Gripping Mug Sides */}
+                <ellipse cx="5" cy="20" rx="5.5" ry="6.5" fill="#faece3" stroke="#dbbeab" strokeWidth="1.2" />
+                <ellipse cx="39" cy="20" rx="5.5" ry="6.5" fill="#faece3" stroke="#dbbeab" strokeWidth="1.2" />
+                {/* Swirling Steam Vapor */}
+                <g style={{ animation: 'steam-swirl 2.2s ease-out infinite' }}>
+                  <path d="M 16 0 C 12 -8 20 -15 16 -22" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.9" />
+                </g>
+                <g style={{ animation: 'steam-swirl 2.2s ease-out infinite 0.9s' }}>
+                  <path d="M 28 1 C 32 -7 24 -14 29 -20" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.8" />
+                </g>
+                {/* Floating Warmth Sparkle */}
+                <path d="M 34 -12 L 36 -9 L 38 -12 L 36 -15 Z" fill="#fbbf24" opacity="0.9" style={{ animation: 'float-up 2s ease-in infinite' }} />
+              </g>
+            </g>
+          </g>
+        )}
       </svg>
     </div>
   );

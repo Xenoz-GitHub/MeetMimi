@@ -41,8 +41,6 @@ export const RainWindow: React.FC<RainWindowProps> = ({
   onFogTrace,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [fogPoints, setFogPoints] = useState<Array<{ x: number; y: number }>>([]);
-  const [isTracing, setIsTracing] = useState(false);
 
   const systemTime = React.useSyncExternalStore(subscribeClock, getClientClock, getServerClock);
   const activeDisplayTime = clockTime || systemTime;
@@ -69,41 +67,23 @@ export const RainWindow: React.FC<RainWindowProps> = ({
       ? 'from-[#192a56] via-[#273c75] to-[#3b6790]'
       : 'from-[#070b16] via-[#0d172b] to-[#18233c]';
 
-  // Mountain layer colors based on time & season
-  const mountainFar =
-    timeOfDay === 'NIGHT'
-      ? '#0c1322'
-      : timeOfDay === 'EVENING' || timeOfDay === 'SUNSET'
-      ? '#4c2e3d'
-      : season === 'SPRING'
-      ? '#6b7d8d'
-      : season === 'AUTUMN'
-      ? '#7a5a48'
-      : '#526978';
+  // City skyline architectural tones based on time of day
+  const isNight = timeOfDay === 'NIGHT';
+  const isEvening = timeOfDay === 'EVENING';
+  const isSunset = timeOfDay === 'SUNSET';
+  const isMorning = timeOfDay === 'MORNING';
 
-  const mountainMid =
-    timeOfDay === 'NIGHT'
-      ? '#131e33'
-      : timeOfDay === 'EVENING' || timeOfDay === 'SUNSET'
-      ? '#5c394c'
-      : season === 'SPRING'
-      ? '#576c7c'
-      : season === 'AUTUMN'
-      ? '#8c5a3b'
-      : '#3f5968';
+  const citySkylineFar =
+    isNight ? '#0a101d' : isEvening ? '#17223b' : isSunset ? '#3d1c2d' : isMorning ? '#5a6b7b' : '#455663';
+  const cityBuildingMid =
+    isNight ? '#0f172a' : isEvening ? '#1e293b' : isSunset ? '#4a2335' : isMorning ? '#64748b' : '#526270';
+  const cityBuildingNear =
+    isNight ? '#162033' : isEvening ? '#26334d' : isSunset ? '#5a2b3d' : isMorning ? '#718096' : '#5e6d7a';
 
-  const mountainNear =
-    timeOfDay === 'NIGHT'
-      ? '#1c2942'
-      : timeOfDay === 'EVENING'
-      ? '#3b2533'
-      : season === 'SPRING'
-      ? '#466b56'
-      : season === 'SUMMER'
-      ? '#2e6b36'
-      : season === 'AUTUMN'
-      ? '#733e1c'
-      : '#2f4239';
+  const windowGlowColor =
+    isNight ? 'rgba(254, 240, 138, 0.95)' : isEvening ? 'rgba(253, 224, 71, 0.9)' : isSunset ? 'rgba(251, 146, 60, 0.85)' : 'rgba(254, 249, 195, 0.55)';
+  const windowCoolColor =
+    isNight ? 'rgba(125, 211, 252, 0.85)' : isEvening ? 'rgba(56, 189, 248, 0.8)' : 'rgba(186, 230, 253, 0.4)';
 
   // Rain, Birds, Petals animation on canvas
   useEffect(() => {
@@ -237,38 +217,16 @@ export const RainWindow: React.FC<RainWindowProps> = ({
     };
   }, [weather, season, isRain, timeOfDay]);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    setIsTracing(true);
+  const handlePointerDown = () => {
     sound.playWindowTap();
     onWindowTap();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setFogPoints((prev) => [...prev.slice(-30), { x, y }]);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isTracing) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setFogPoints((prev) => [...prev.slice(-35), { x, y }]);
-    if (fogPoints.length > 8) {
-      onFogTrace();
-    }
-  };
-
-  const handlePointerUp = () => {
-    setIsTracing(false);
   };
 
   return (
     <div
       className="relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden shadow-2xl border-4 border-[#4a362a] bg-[#1a1412] select-none cursor-pointer group"
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      title="Tap the window pane or trace the glass"
+      title="Tap the window pane to listen to the rain"
     >
       {/* REAL-TIME DEVICE CLOCK MOUNTED AT WINDOW HEADER */}
       <div className="absolute top-2 right-3 z-30 pointer-events-none">
@@ -283,70 +241,453 @@ export const RainWindow: React.FC<RainWindowProps> = ({
         </div>
       </div>
 
-      {/* OUTSIDE LAYERED MOUNTAIN LANDSCAPE & SKY */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${skyBackground} transition-colors duration-1000`}>
-        {/* Layer 1: Distant Misty Mountains */}
-        <div className="absolute bottom-6 inset-x-0 h-28 opacity-75">
-          <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="w-full h-full">
-            <path
-              d="M 0 120 L 0 50 Q 60 20 120 45 Q 180 15 240 40 Q 320 10 400 45 L 400 120 Z"
-              fill={mountainFar}
-            />
+      {/* OUTSIDE DETAILED BUSY CITY SKYLINE & HIGH-RISE BUILDINGS */}
+      <div className={`absolute inset-0 bg-gradient-to-b ${skyBackground} transition-colors duration-1000 overflow-hidden`}>
+        {/* Layer 1: Distant City Skyscrapers, Spire Towers & Harbor Suspension Bridge */}
+        <div className="absolute bottom-6 inset-x-0 h-40 opacity-80">
+          <svg viewBox="0 0 500 150" preserveAspectRatio="none" className="w-full h-full">
+            {/* Distant skyline silhouettes */}
+            {/* Left cluster */}
+            <rect x="0" y="65" width="26" height="85" fill={citySkylineFar} />
+            <rect x="22" y="42" width="32" height="108" fill={citySkylineFar} />
+            {/* Needle Tower with Aircraft Warning Beacon */}
+            <rect x="37" y="14" width="2" height="28" fill={citySkylineFar} />
+            <circle cx="38" cy="14" r="2.2" fill="#ef4444" className="animate-pulse" />
+
+            <rect x="52" y="68" width="24" height="82" fill={citySkylineFar} />
+            <polygon points="74,52 82,36 90,52" fill={citySkylineFar} />
+            <rect x="74" y="52" width="16" height="98" fill={citySkylineFar} />
+            <rect x="81" y="22" width="2" height="14" fill={citySkylineFar} />
+            <circle cx="82" cy="22" r="2" fill="#ef4444" className="animate-pulse" />
+
+            {/* Distant Suspension Bridge spanning across the river bay */}
+            <g opacity="0.6">
+              {/* Bridge Tower 1 */}
+              <rect x="104" y="60" width="3" height="70" fill={citySkylineFar} />
+              <rect x="111" y="60" width="3" height="70" fill={citySkylineFar} />
+              <rect x="102" y="74" width="14" height="2" fill={citySkylineFar} />
+              <circle cx="109" cy="59" r="1.5" fill="#ef4444" className="animate-pulse" />
+              {/* Bridge Tower 2 */}
+              <rect x="144" y="60" width="3" height="70" fill={citySkylineFar} />
+              <rect x="151" y="60" width="3" height="70" fill={citySkylineFar} />
+              <rect x="142" y="74" width="14" height="2" fill={citySkylineFar} />
+              <circle cx="149" cy="59" r="1.5" fill="#ef4444" className="animate-pulse" />
+              {/* Main suspension cable curve */}
+              <path d="M 94 92 Q 124 106 148 76 Q 170 106 190 92" stroke={citySkylineFar} strokeWidth="1" fill="none" />
+              {/* Deck */}
+              <line x1="90" y1="92" x2="195" y2="92" stroke={citySkylineFar} strokeWidth="2" />
+            </g>
+
+            {/* Center Supertall Skyscraper cluster */}
+            <rect x="162" y="28" width="38" height="122" fill={citySkylineFar} />
+            <rect x="180" y="10" width="2.5" height="18" fill={citySkylineFar} />
+            <circle cx="181" cy="10" r="2.2" fill="#ef4444" className="animate-pulse" />
+            
+            {/* Stepped art-deco tower with illuminated tiered crowns */}
+            <rect x="198" y="55" width="28" height="95" fill={citySkylineFar} />
+            <rect x="203" y="42" width="18" height="13" fill={citySkylineFar} />
+            <rect x="208" y="32" width="8" height="10" fill={citySkylineFar} />
+            <rect x="211.5" y="18" width="1.5" height="14" fill={citySkylineFar} />
+            <circle cx="212" cy="18" r="2" fill="#ef4444" className="animate-pulse" />
+
+            {/* Center-Right Tower with Crown Spire */}
+            <rect x="230" y="52" width="36" height="98" fill={citySkylineFar} />
+            <polygon points="230,52 248,32 266,52" fill={citySkylineFar} />
+            <rect x="247" y="16" width="2" height="16" fill={citySkylineFar} />
+            <circle cx="248" cy="16" r="2.2" fill="#ef4444" className="animate-pulse" />
+
+            {/* Distant Construction Crane on rooftop */}
+            <g stroke={citySkylineFar} strokeWidth="1" fill="none" opacity="0.8">
+              <line x1="282" y1="52" x2="282" y2="28" />
+              <line x1="268" y1="30" x2="300" y2="30" />
+              <line x1="282" y1="24" x2="295" y2="30" />
+              <circle cx="298" cy="30" r="1.5" fill="#f59e0b" className="animate-ping" />
+            </g>
+            <rect x="274" y="52" width="28" height="98" fill={citySkylineFar} />
+
+            {/* Right cluster */}
+            <rect x="306" y="38" width="40" height="112" fill={citySkylineFar} />
+            {/* Diagonal sloped top modern architectural tower */}
+            <polygon points="346,48 376,28 376,150 346,150" fill={citySkylineFar} />
+            <rect x="375" y="14" width="2" height="14" fill={citySkylineFar} />
+            <circle cx="376" cy="14" r="2" fill="#ef4444" className="animate-pulse" />
+
+            <rect x="376" y="56" width="34" height="94" fill={citySkylineFar} />
+            <rect x="408" y="32" width="36" height="118" fill={citySkylineFar} />
+            <rect x="425" y="14" width="2" height="18" fill={citySkylineFar} />
+            <circle cx="426" cy="14" r="2" fill="#ef4444" className="animate-pulse" />
+
+            <rect x="442" y="48" width="32" height="102" fill={citySkylineFar} />
+            <rect x="472" y="60" width="28" height="90" fill={citySkylineFar} />
+
+            {/* Distant window specks (sparkling in evening/night and overcast) */}
+            <g fill={windowGlowColor} opacity="0.7">
+              <rect x="26" y="52" width="2" height="2" />
+              <rect x="32" y="62" width="2" height="2" />
+              <rect x="28" y="72" width="2" height="2" />
+              <rect x="168" y="40" width="2" height="2" />
+              <rect x="176" y="50" width="2" height="2" />
+              <rect x="184" y="40" width="2" height="2" />
+              <rect x="170" y="64" width="2" height="2" />
+              <rect x="178" y="74" width="2" height="2" />
+              <rect x="236" y="60" width="2" height="2" />
+              <rect x="244" y="70" width="2" height="2" />
+              <rect x="252" y="60" width="2" height="2" />
+              <rect x="314" y="48" width="2" height="2" />
+              <rect x="322" y="58" width="2" height="2" />
+              <rect x="330" y="68" width="2" height="2" />
+              <rect x="414" y="44" width="2" height="2" />
+              <rect x="424" y="54" width="2" height="2" />
+              <rect x="432" y="64" width="2" height="2" />
+            </g>
           </svg>
         </div>
 
-        {/* Layer 2: Mid-ground Slopes & Ridge */}
-        <div className="absolute bottom-2 inset-x-0 h-24 opacity-85">
-          <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="w-full h-full">
-            <path
-              d="M 0 120 L 0 60 Q 70 30 140 65 Q 210 25 280 55 Q 350 35 400 60 L 400 120 Z"
-              fill={mountainMid}
-            />
+        {/* Layer 2: Mid-ground Dense City Buildings & Glowing Windows */}
+        <div className="absolute bottom-2 inset-x-0 h-34 opacity-95">
+          <svg viewBox="0 0 500 125" preserveAspectRatio="none" className="w-full h-full">
+            {/* Building 1: Left Commercial Office Tower with Glass Grid */}
+            <rect x="8" y="32" width="46" height="93" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            {/* Rooftop Water Tank on Stilts */}
+            <line x1="18" y1="32" x2="18" y2="24" stroke={cityBuildingMid} strokeWidth="1.5" />
+            <line x1="28" y1="32" x2="28" y2="24" stroke={cityBuildingMid} strokeWidth="1.5" />
+            <ellipse cx="23" cy="22" rx="7" ry="3.5" fill="#64748b" />
+            <rect x="16" y="19" width="14" height="5" fill="#475569" />
+            <ellipse cx="23" cy="19" rx="7" ry="3" fill="#94a3b8" />
+
+            {/* Building 2: Slender High-rise */}
+            <rect x="52" y="20" width="38" height="105" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="68" y="8" width="2" height="12" fill="#94a3b8" />
+            <circle cx="69" cy="8" r="1.8" fill="#ef4444" className="animate-pulse" />
+
+            {/* Building 3: Broad Commercial Highrise with Stepped Roof */}
+            <rect x="86" y="38" width="54" height="87" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="94" y="30" width="38" height="8" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+
+            {/* Building 4: Central Modern Prism Skyscraper */}
+            <rect x="138" y="14" width="48" height="111" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            <polygon points="138,14 162,2 186,14" fill={cityBuildingMid} />
+            <line x1="162" y1="2" x2="162" y2="-2" stroke="#cbd5e1" strokeWidth="2" />
+            <circle cx="162" cy="-2" r="2" fill="#ef4444" className="animate-pulse" />
+
+            {/* Building 5: Stepped Residential Complex with Brick Texture & Water Tower */}
+            <rect x="182" y="28" width="54" height="97" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="214" y="18" width="14" height="10" rx="1" fill="#78350f" />
+
+            {/* Building 6: Corporate Tower with Spire */}
+            <rect x="232" y="18" width="44" height="107" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="252" y="6" width="2" height="12" fill="#94a3b8" />
+            <circle cx="253" cy="6" r="1.8" fill="#ef4444" className="animate-pulse" />
+
+            {/* Building 7: Apartment Complex with Fire Escapes */}
+            <rect x="272" y="34" width="48" height="91" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+
+            {/* Building 8: Modern High-rise */}
+            <rect x="316" y="24" width="42" height="101" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+
+            {/* Building 9: Broad Complex with Rooftop Sat-dish */}
+            <rect x="354" y="32" width="56" height="93" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            <path d="M 388 26 Q 396 30 394 20" stroke="#94a3b8" strokeWidth="2" fill="none" />
+
+            {/* Building 10: Right Metropolitan Tower */}
+            <rect x="406" y="16" width="46" height="109" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="448" y="38" width="46" height="87" fill={cityBuildingMid} stroke="#1e293b" strokeWidth="0.8" />
+
+            {/* DETAILED GLOWING WINDOW GRIDS ACROSS THE MID BUILDINGS */}
+            {/* Left Tower Windows */}
+            <g fill={windowGlowColor}>
+              <rect x="58" y="28" width="4.5" height="3.5" rx="0.5" />
+              <rect x="67" y="28" width="4.5" height="3.5" rx="0.5" />
+              <rect x="76" y="28" width="4.5" height="3.5" rx="0.5" />
+              <rect x="58" y="38" width="4.5" height="3.5" rx="0.5" />
+              <rect x="67" y="38" width="4.5" height="3.5" rx="0.5" />
+              <rect x="76" y="38" width="4.5" height="3.5" rx="0.5" />
+              <rect x="58" y="48" width="4.5" height="3.5" rx="0.5" />
+              <rect x="76" y="48" width="4.5" height="3.5" rx="0.5" />
+              <rect x="67" y="58" width="4.5" height="3.5" rx="0.5" />
+              <rect x="76" y="58" width="4.5" height="3.5" rx="0.5" />
+              <rect x="58" y="68" width="4.5" height="3.5" rx="0.5" />
+              <rect x="67" y="68" width="4.5" height="3.5" rx="0.5" />
+            </g>
+
+            {/* Central Glass Skyscraper Windows */}
+            <g fill={windowCoolColor}>
+              <rect x="144" y="22" width="5" height="3.5" rx="0.5" />
+              <rect x="154" y="22" width="5" height="3.5" rx="0.5" />
+              <rect x="164" y="22" width="5" height="3.5" rx="0.5" />
+              <rect x="174" y="22" width="5" height="3.5" rx="0.5" />
+              <rect x="144" y="32" width="5" height="3.5" rx="0.5" />
+              <rect x="154" y="32" width="5" height="3.5" rx="0.5" />
+              <rect x="174" y="32" width="5" height="3.5" rx="0.5" />
+              <rect x="144" y="42" width="5" height="3.5" rx="0.5" />
+              <rect x="164" y="42" width="5" height="3.5" rx="0.5" />
+              <rect x="174" y="42" width="5" height="3.5" rx="0.5" />
+              <rect x="144" y="52" width="5" height="3.5" rx="0.5" />
+              <rect x="154" y="52" width="5" height="3.5" rx="0.5" />
+              <rect x="164" y="52" width="5" height="3.5" rx="0.5" />
+              <rect x="144" y="62" width="5" height="3.5" rx="0.5" />
+              <rect x="174" y="62" width="5" height="3.5" rx="0.5" />
+              <rect x="154" y="72" width="5" height="3.5" rx="0.5" />
+              <rect x="164" y="72" width="5" height="3.5" rx="0.5" />
+            </g>
+
+            {/* Right Tower Windows */}
+            <g fill={windowGlowColor}>
+              <rect x="238" y="26" width="4.5" height="3.5" rx="0.5" />
+              <rect x="247" y="26" width="4.5" height="3.5" rx="0.5" />
+              <rect x="256" y="26" width="4.5" height="3.5" rx="0.5" />
+              <rect x="265" y="26" width="4.5" height="3.5" rx="0.5" />
+              <rect x="238" y="36" width="4.5" height="3.5" rx="0.5" />
+              <rect x="256" y="36" width="4.5" height="3.5" rx="0.5" />
+              <rect x="265" y="36" width="4.5" height="3.5" rx="0.5" />
+              <rect x="247" y="46" width="4.5" height="3.5" rx="0.5" />
+              <rect x="256" y="46" width="4.5" height="3.5" rx="0.5" />
+              <rect x="238" y="56" width="4.5" height="3.5" rx="0.5" />
+              <rect x="247" y="56" width="4.5" height="3.5" rx="0.5" />
+              <rect x="265" y="56" width="4.5" height="3.5" rx="0.5" />
+
+              <rect x="324" y="32" width="4" height="3" rx="0.5" />
+              <rect x="332" y="32" width="4" height="3" rx="0.5" />
+              <rect x="340" y="32" width="4" height="3" rx="0.5" />
+              <rect x="324" y="42" width="4" height="3" rx="0.5" />
+              <rect x="340" y="42" width="4" height="3" rx="0.5" />
+              <rect x="332" y="52" width="4" height="3" rx="0.5" />
+              <rect x="340" y="52" width="4" height="3" rx="0.5" />
+
+              <rect x="414" y="24" width="4" height="3" rx="0.5" />
+              <rect x="424" y="24" width="4" height="3" rx="0.5" />
+              <rect x="434" y="24" width="4" height="3" rx="0.5" />
+              <rect x="414" y="34" width="4" height="3" rx="0.5" />
+              <rect x="434" y="34" width="4" height="3" rx="0.5" />
+              <rect x="424" y="44" width="4" height="3" rx="0.5" />
+              <rect x="434" y="44" width="4" height="3" rx="0.5" />
+            </g>
           </svg>
         </div>
 
-        {/* Layer 3: Foreground Pine Trees & Seasonal Foliage */}
-        <div className="absolute bottom-0 inset-x-0 h-20 opacity-95">
-          <svg viewBox="0 0 400 100" preserveAspectRatio="none" className="w-full h-full">
-            <path
-              d="M 0 100 Q 30 40 70 85 Q 120 30 160 80 Q 210 45 260 85 Q 310 35 360 80 Q 380 50 400 70 L 400 100 Z"
-              fill={mountainNear}
-            />
+        {/* Layer 3: Foreground City Apartments, Balconies, Neon Signage & Elevated Expressway with Continuous Flowing Traffic */}
+        <div className="absolute bottom-0 inset-x-0 h-28 opacity-98">
+          <svg viewBox="0 0 500 100" preserveAspectRatio="none" className="w-full h-full">
+            {/* Near Apartment Blocks with Solid Foundations */}
+            <rect x="0" y="22" width="62" height="78" fill={cityBuildingNear} stroke="#0f172a" strokeWidth="1" />
+            <rect x="56" y="12" width="68" height="88" fill={cityBuildingNear} stroke="#0f172a" strokeWidth="1" />
+            <rect x="120" y="28" width="75" height="72" fill={cityBuildingNear} stroke="#0f172a" strokeWidth="1" />
+            <rect x="188" y="16" width="85" height="84" fill={cityBuildingNear} stroke="#0f172a" strokeWidth="1" />
+            <rect x="268" y="10" width="65" height="90" fill={cityBuildingNear} stroke="#0f172a" strokeWidth="1" />
+            <rect x="328" y="24" width="80" height="76" fill={cityBuildingNear} stroke="#0f172a" strokeWidth="1" />
+            <rect x="404" y="14" width="96" height="86" fill={cityBuildingNear} stroke="#0f172a" strokeWidth="1" />
+
+            {/* Balcony railings on near apartments */}
+            <g stroke="#334155" strokeWidth="1">
+              <line x1="62" y1="24" x2="86" y2="24" />
+              <line x1="92" y1="24" x2="116" y2="24" />
+              <line x1="62" y1="40" x2="86" y2="40" />
+              <line x1="92" y1="40" x2="116" y2="40" />
+              <line x1="278" y1="22" x2="308" y2="22" />
+              <line x1="278" y1="38" x2="308" y2="38" />
+            </g>
+
+            {/* Glowing Neon Sign on Rooftop */}
+            <g transform="translate(136, 15)" style={{ animation: 'neon-shimmer 3s ease-in-out infinite' }}>
+              <rect x="0" y="0" width="40" height="13" rx="2.5" fill="#0f172a" stroke="#ec4899" strokeWidth="1.2" />
+              <text x="6" y="9.5" fill="#f472b6" fontSize="7.5" fontFamily="sans-serif" fontWeight="900" letterSpacing="0.8">CAFE</text>
+              <circle cx="34" cy="6.5" r="2.5" fill="#38bdf8" />
+            </g>
+
+            {/* Near Glowing Apartment Windows */}
+            <g fill={windowGlowColor}>
+              <rect x="8" y="28" width="6" height="5" rx="0.5" />
+              <rect x="20" y="28" width="6" height="5" rx="0.5" />
+              <rect x="32" y="28" width="6" height="5" rx="0.5" />
+              <rect x="8" y="40" width="6" height="5" rx="0.5" />
+              <rect x="32" y="40" width="6" height="5" rx="0.5" />
+
+              <rect x="66" y="16" width="7" height="6" rx="0.5" />
+              <rect x="96" y="16" width="7" height="6" rx="0.5" />
+              <rect x="66" y="32" width="7" height="6" rx="0.5" />
+              <rect x="82" y="32" width="7" height="6" rx="0.5" />
+
+              <rect x="198" y="24" width="6" height="5" rx="0.5" />
+              <rect x="212" y="24" width="6" height="5" rx="0.5" />
+              <rect x="226" y="24" width="6" height="5" rx="0.5" />
+              <rect x="198" y="38" width="6" height="5" rx="0.5" />
+              <rect x="226" y="38" width="6" height="5" rx="0.5" />
+
+              <rect x="342" y="32" width="6" height="5" rx="0.5" />
+              <rect x="356" y="32" width="6" height="5" rx="0.5" />
+              <rect x="370" y="32" width="6" height="5" rx="0.5" />
+              <rect x="342" y="46" width="6" height="5" rx="0.5" />
+              <rect x="370" y="46" width="6" height="5" rx="0.5" />
+
+              <rect x="418" y="24" width="7" height="6" rx="0.5" />
+              <rect x="434" y="24" width="7" height="6" rx="0.5" />
+              <rect x="450" y="24" width="7" height="6" rx="0.5" />
+              <rect x="418" y="38" width="7" height="6" rx="0.5" />
+              <rect x="450" y="38" width="7" height="6" rx="0.5" />
+            </g>
+
+            {/* === ELEVATED CITY EXPRESSWAY WITH CONTINUOUS BUSY MOVING TRAFFIC === */}
+            {/* Concrete highway deck with support piers */}
+            <rect x="0" y="66" width="500" height="12" fill="#1e293b" stroke="#334155" strokeWidth="1" />
+            <line x1="0" y1="72" x2="500" y2="72" stroke="#475569" strokeWidth="0.8" strokeDasharray="6 4" />
+            {/* Highway support pillars */}
+            <rect x="65" y="78" width="14" height="22" fill="#0f172a" />
+            <rect x="175" y="78" width="14" height="22" fill="#0f172a" />
+            <rect x="285" y="78" width="14" height="22" fill="#0f172a" />
+            <rect x="395" y="78" width="14" height="22" fill="#0f172a" />
+
+            {/* Traffic Stream 1: Eastbound Lane (Diverse Headlights & Vehicle Silhouettes) */}
+            <g style={{ animation: 'traffic-east 8s linear infinite' }}>
+              {/* Vehicle 1: Standard Sedan */}
+              <g transform="translate(20, 68)">
+                <rect x="0" y="0" width="14" height="3" rx="1" fill="#475569" />
+                <rect x="3" y="-1.5" width="7" height="1.8" rx="0.5" fill="#334155" />
+                <ellipse cx="14" cy="1" rx="2.5" ry="1.2" fill="#fef08a" />
+                <ellipse cx="14" cy="2.5" rx="2.5" ry="1.2" fill="#fef08a" />
+              </g>
+
+              {/* Vehicle 2: Yellow City Taxi with Roof Light */}
+              <g transform="translate(90, 68)">
+                <rect x="0" y="0" width="13" height="3" rx="1" fill="#ca8a04" />
+                <rect x="3" y="-1.5" width="6" height="1.8" rx="0.5" fill="#a16207" />
+                <rect x="5.5" y="-2.5" width="2" height="1" rx="0.3" fill="#fde047" />
+                <ellipse cx="13" cy="1" rx="2.2" ry="1.2" fill="#fef08a" />
+                <ellipse cx="13" cy="2.5" rx="2.2" ry="1.2" fill="#fef08a" />
+              </g>
+
+              {/* Vehicle 3: Metro City Transit Bus */}
+              <g transform="translate(180, 67)">
+                <rect x="0" y="0" width="28" height="4.5" rx="1" fill="#1e3a5f" />
+                <rect x="2" y="0.8" width="22" height="1.5" rx="0.5" fill="#93c5fd" opacity="0.8" />
+                <ellipse cx="28" cy="1.2" rx="3" ry="1.4" fill="#fef08a" />
+                <ellipse cx="28" cy="3.5" rx="3" ry="1.4" fill="#fef08a" />
+              </g>
+
+              {/* Vehicle 4: Delivery Box Van */}
+              <g transform="translate(280, 67.5)">
+                <rect x="0" y="-1" width="12" height="4.5" rx="0.8" fill="#e2e8f0" />
+                <rect x="12" y="0.5" width="6" height="3" rx="0.8" fill="#94a3b8" />
+                <ellipse cx="18" cy="1.2" rx="2.5" ry="1.2" fill="#fef08a" />
+                <ellipse cx="18" cy="2.8" rx="2.5" ry="1.2" fill="#fef08a" />
+              </g>
+
+              {/* Vehicle 5: Compact Hatchback */}
+              <g transform="translate(380, 68)">
+                <rect x="0" y="0" width="10" height="3" rx="1" fill="#64748b" />
+                <rect x="2" y="-1.5" width="5" height="1.8" rx="0.5" fill="#475569" />
+                <ellipse cx="10" cy="1" rx="2" ry="1.2" fill="#fef08a" />
+                <ellipse cx="10" cy="2.5" rx="2" ry="1.2" fill="#fef08a" />
+              </g>
+            </g>
+
+            {/* Traffic Stream 1 (Staggered Second Wave) */}
+            <g style={{ animation: 'traffic-east 8s linear infinite 4s' }}>
+              <g transform="translate(50, 68)">
+                <rect x="0" y="0" width="15" height="3" rx="1" fill="#334155" />
+                <ellipse cx="15" cy="1" rx="2.2" ry="1.2" fill="#fef08a" />
+                <ellipse cx="15" cy="2.5" rx="2.2" ry="1.2" fill="#fef08a" />
+              </g>
+              <g transform="translate(140, 67.5)">
+                <rect x="0" y="-0.5" width="18" height="4" rx="0.8" fill="#475569" />
+                <ellipse cx="18" cy="1" rx="2.5" ry="1.3" fill="#fef08a" />
+                <ellipse cx="18" cy="2.8" rx="2.5" ry="1.3" fill="#fef08a" />
+              </g>
+              <g transform="translate(240, 68)">
+                <rect x="0" y="0" width="12" height="3" rx="1" fill="#ca8a04" />
+                <ellipse cx="12" cy="1" rx="2.2" ry="1.2" fill="#fef08a" />
+                <ellipse cx="12" cy="2.5" rx="2.2" ry="1.2" fill="#fef08a" />
+              </g>
+              <g transform="translate(340, 67)">
+                <rect x="0" y="0" width="26" height="4.5" rx="1" fill="#1e3a5f" />
+                <rect x="2" y="0.8" width="20" height="1.5" rx="0.5" fill="#93c5fd" opacity="0.8" />
+                <ellipse cx="26" cy="1.2" rx="3" ry="1.4" fill="#fef08a" />
+                <ellipse cx="26" cy="3.5" rx="3" ry="1.4" fill="#fef08a" />
+              </g>
+            </g>
+
+            {/* Traffic Stream 2: Westbound Lane (Diverse Taillights & Silhouettes) */}
+            <g style={{ animation: 'traffic-west 7.5s linear infinite' }}>
+              {/* Vehicle 1: Sedan with Dual Taillights */}
+              <g transform="translate(450, 73.5)">
+                <rect x="0" y="0" width="14" height="3" rx="1" fill="#334155" />
+                <rect x="4" y="-1.5" width="7" height="1.8" rx="0.5" fill="#1e293b" />
+                <ellipse cx="0" cy="1" rx="2" ry="1.2" fill="#f43f5e" />
+                <ellipse cx="0" cy="2.5" rx="2" ry="1.2" fill="#f43f5e" />
+              </g>
+
+              {/* Vehicle 2: Metro Bus with Tall Rear Taillights */}
+              <g transform="translate(360, 72.5)">
+                <rect x="0" y="0" width="26" height="4.5" rx="1" fill="#1e293b" />
+                <rect x="3" y="0.8" width="20" height="1.5" rx="0.5" fill="#fca5a5" opacity="0.6" />
+                <ellipse cx="0" cy="1" rx="2.2" ry="1.4" fill="#f43f5e" />
+                <ellipse cx="0" cy="3.5" rx="2.2" ry="1.4" fill="#f43f5e" />
+              </g>
+
+              {/* Vehicle 3: Delivery Van with High Brake Light */}
+              <g transform="translate(260, 73)">
+                <rect x="5" y="0" width="6" height="3" rx="0.8" fill="#64748b" />
+                <rect x="0" y="-1" width="11" height="4.5" rx="0.8" fill="#475569" />
+                <ellipse cx="0" cy="0.8" rx="2" ry="1.2" fill="#f43f5e" />
+                <ellipse cx="0" cy="2.8" rx="2" ry="1.2" fill="#f43f5e" />
+                <circle cx="0" cy="-0.5" r="0.8" fill="#ef4444" />
+              </g>
+
+              {/* Vehicle 4: SUV with Horizontal Light Bar */}
+              <g transform="translate(160, 73.5)">
+                <rect x="0" y="0" width="16" height="3.2" rx="1" fill="#1e293b" />
+                <line x1="0" y1="1" x2="0" y2="2.5" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round" />
+              </g>
+
+              {/* Vehicle 5: Taxi with Rear Glow */}
+              <g transform="translate(60, 73.5)">
+                <rect x="0" y="0" width="13" height="3" rx="1" fill="#854d0e" />
+                <rect x="5.5" y="-2" width="2" height="0.8" rx="0.3" fill="#fef08a" opacity="0.8" />
+                <ellipse cx="0" cy="1" rx="1.8" ry="1.1" fill="#f43f5e" />
+                <ellipse cx="0" cy="2.5" rx="1.8" ry="1.1" fill="#f43f5e" />
+              </g>
+            </g>
+
+            {/* Traffic Stream 2 (Staggered Second Wave) */}
+            <g style={{ animation: 'traffic-west 7.5s linear infinite 3.75s' }}>
+              <g transform="translate(410, 73.5)">
+                <rect x="0" y="0" width="14" height="3" rx="1" fill="#1e293b" />
+                <ellipse cx="0" cy="1" rx="2" ry="1.2" fill="#f43f5e" />
+                <ellipse cx="0" cy="2.5" rx="2" ry="1.2" fill="#f43f5e" />
+              </g>
+              <g transform="translate(300, 72.5)">
+                <rect x="0" y="0" width="26" height="4.5" rx="1" fill="#0f172a" />
+                <ellipse cx="0" cy="1.2" rx="2.2" ry="1.3" fill="#f43f5e" />
+                <ellipse cx="0" cy="3.5" rx="2.2" ry="1.3" fill="#f43f5e" />
+              </g>
+              <g transform="translate(200, 73.5)">
+                <rect x="0" y="0" width="12" height="3" rx="1" fill="#475569" />
+                <ellipse cx="0" cy="1" rx="1.8" ry="1.1" fill="#f43f5e" />
+                <ellipse cx="0" cy="2.5" rx="1.8" ry="1.1" fill="#f43f5e" />
+              </g>
+              <g transform="translate(90, 73)">
+                <rect x="0" y="-0.5" width="15" height="4" rx="0.8" fill="#334155" />
+                <ellipse cx="0" cy="0.8" rx="2" ry="1.2" fill="#f43f5e" />
+                <ellipse cx="0" cy="2.8" rx="2" ry="1.2" fill="#f43f5e" />
+              </g>
+            </g>
+
+            {/* Wet road surface rain reflections */}
+            <line x1="10" y1="76" x2="490" y2="76" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8" opacity="0.7" />
           </svg>
         </div>
 
-        {/* Summer Sunflowers on the hillside outside */}
-        {season === 'SUMMER' && !isRain && (
-          <div className="absolute bottom-1 left-24 flex items-center gap-4 opacity-90 pointer-events-none">
-            <div className="w-3 h-3 rounded-full bg-amber-400 border border-amber-600 shadow-sm" />
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-300 border border-amber-500 shadow-sm" />
-            <div className="w-3 h-3 rounded-full bg-amber-400 border border-amber-600 shadow-sm" />
-          </div>
+        {/* City Rainy Mist Haze Drifting across the Skyline */}
+        {isRain && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(203, 213, 225, 0.22) 0%, rgba(148, 163, 184, 0.15) 60%, rgba(100, 116, 139, 0.28) 100%)',
+            }}
+          />
         )}
 
-        {/* Spring Sakura branches framing top of window */}
-        {season === 'SPRING' && (
-          <div className="absolute top-0 left-0 w-36 h-16 pointer-events-none opacity-85">
-            <svg viewBox="0 0 120 50" className="w-full h-full">
-              <path d="M 0 0 Q 40 15 80 10 Q 110 5 120 18" stroke="#4a3528" strokeWidth="2.5" fill="none" />
-              <circle cx="45" cy="12" r="3" fill="#f472b6" />
-              <circle cx="50" cy="15" r="2.5" fill="#fbcfe8" />
-              <circle cx="75" cy="11" r="3" fill="#f472b6" />
-              <circle cx="82" cy="8" r="2.5" fill="#fbcfe8" />
-              <circle cx="110" cy="12" r="3" fill="#f472b6" />
-            </svg>
-          </div>
-        )}
-
-        {/* Night streetlamp glow outside */}
-        {timeOfDay === 'NIGHT' && (
-          <div className="absolute top-8 left-16 pointer-events-none">
-            <div className="w-4 h-4 rounded-full bg-amber-200/90 shadow-[0_0_35px_18px_rgba(251,191,36,0.55)]" />
-            <div className="w-1 h-14 bg-stone-700/80 mx-auto" />
-          </div>
-        )}
-
-        {/* Warm Sunlight Shafts */}
+        {/* Warm Sunlight Shafts across City during sunny times */}
         {isSunny && timeOfDay !== 'NIGHT' && (
           <div
             className="absolute inset-0 pointer-events-none"
@@ -363,13 +704,6 @@ export const RainWindow: React.FC<RainWindowProps> = ({
 
       {/* Condensation / Fog overlay */}
       <div className="absolute inset-0 bg-sky-100/10 backdrop-blur-[1px] pointer-events-none z-10" />
-
-      {/* Traced fog points */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
-        {fogPoints.map((p, idx) => (
-          <circle key={idx} cx={p.x} cy={p.y} r="8" fill="rgba(255,255,255,0.3)" />
-        ))}
-      </svg>
 
       {/* Realistic Wooden Panes & Window Sill Frame */}
       <div className="absolute inset-0 pointer-events-none z-20">

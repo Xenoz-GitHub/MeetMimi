@@ -65,9 +65,17 @@ export type CatState =
   | 'GROOMING'
   | 'WALKING'
   | 'WATCHING_WINDOW'
-  | 'PURRING';
+  | 'PURRING'
+  | 'JUMPING_UP'
+  | 'JUMPING_DOWN';
 
-export type CatLocation = 'BED' | 'RUG' | 'WINDOW_SILL';
+export type CatLocation =
+  | 'BED'
+  | 'DESK'
+  | 'WINDOW_SILL'
+  | 'LEAPING_TO_DESK'
+  | 'LEAPING_TO_WINDOW'
+  | 'LEAPING_TO_BED';
 
 export type TimeOfDay = 'MORNING' | 'DAYTIME' | 'SUNSET' | 'EVENING' | 'NIGHT';
 
