@@ -1,0 +1,6 @@
+{
+  "name": "Little After Rain - Interactive Companion Mimi",
+  "description": "A relaxing portrait-mode game about a cozy room, rainy weather, and Mimi, your adorable interactive companion with 10 distinct expressions and context-aware dialogue.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

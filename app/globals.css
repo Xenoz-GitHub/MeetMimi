@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* Cozy Whimsical Cartoon Game Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f5ede2;
+  border-radius: 9999px;
+  border: 2px solid #ecdac6;
+  margin: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #9d6840;
+  border-radius: 9999px;
+  border: 2px solid #f5ede2;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7e4f2b;
+}
+::-webkit-scrollbar-thumb:active {
+  background: #5c3519;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #9d6840 #f5ede2;
+}
+
+.cartoon-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+.cartoon-scrollbar::-webkit-scrollbar-track {
+  background: #f3e8da;
+  border-radius: 9999px;
+  border: 2px solid #e5d1bd;
+}
+.cartoon-scrollbar::-webkit-scrollbar-thumb {
+  background: #a46d43;
+  border-radius: 9999px;
+  border: 2px solid #f3e8da;
+}
+.cartoon-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #84532e;
+}
+
+@keyframes mimi-breathe {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.008);
+  }
+}
+
+@keyframes steam-float {
+  0% {
+    transform: translateY(0px) scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-6px) scale(1.1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-12px) scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0px) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-24px) scale(1.2);
+    opacity: 0;
+  }
+}
+
